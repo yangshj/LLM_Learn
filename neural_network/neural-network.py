@@ -90,34 +90,34 @@ class OurNeuralNetwork:
         d_L_d_ypred = -2 * (y_true - y_pred)
 
         # 输出层(o1)各参数的梯度
-        d_ypred_d_w5 = h1 * deriv_sigmoid(sum_o1)  # w5的梯度
-        d_ypred_d_w6 = h2 * deriv_sigmoid(sum_o1)  # w6的梯度
-        d_ypred_d_b3 = deriv_sigmoid(sum_o1)       # b3的梯度
+        d_ypred_d_w5 = h1 * deriv_sigmoid(sum_o1)  # w5的梯度(预测值对w5对偏导数)
+        d_ypred_d_w6 = h2 * deriv_sigmoid(sum_o1)  # w6的梯度(预测值对w6对偏导数)
+        d_ypred_d_b3 = deriv_sigmoid(sum_o1)       # b3的梯度(预测值对b3对偏导数)
 
         # 隐藏层对预测值的影响
         d_ypred_d_h1 = self.w5 * deriv_sigmoid(sum_o1)  # h1对输出的影响
         d_ypred_d_h2 = self.w6 * deriv_sigmoid(sum_o1)  # h2对输出的影响
 
         # 隐藏层(h1)各参数的梯度
-        d_h1_d_w1 = x[0] * deriv_sigmoid(sum_h1)  # w1的梯度
-        d_h1_d_w2 = x[1] * deriv_sigmoid(sum_h1)  # w2的梯度
-        d_h1_d_b1 = deriv_sigmoid(sum_h1)  # b1的梯度
+        d_h1_d_w1 = x[0] * deriv_sigmoid(sum_h1)  # w1的梯度(h1对w1偏导数)
+        d_h1_d_w2 = x[1] * deriv_sigmoid(sum_h1)  # w2的梯度(h1对w2偏导数)
+        d_h1_d_b1 = deriv_sigmoid(sum_h1)  # b1的梯度(h1对b1的偏导数)
 
         # 隐藏层(h2)各参数的梯度
-        d_h2_d_w3 = x[0] * deriv_sigmoid(sum_h2)  # w3的梯度
-        d_h2_d_w4 = x[1] * deriv_sigmoid(sum_h2)  # w4的梯度
-        d_h2_d_b2 = deriv_sigmoid(sum_h2)  # b2的梯度
+        d_h2_d_w3 = x[0] * deriv_sigmoid(sum_h2)  # w3的梯度(h2对w3偏导数)
+        d_h2_d_w4 = x[1] * deriv_sigmoid(sum_h2)  # w4的梯度(h2对w4偏导数)
+        d_h2_d_b2 = deriv_sigmoid(sum_h2)  # b2的梯度(h2对b2偏导数)
 
         # --- 更新权重和偏置(梯度下降) ---
         # 更新h1的参数
-        self.w1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w1
-        self.w2 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w2
-        self.b1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_b1
+        self.w1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w1 #损失值对w1的偏导数
+        self.w2 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w2 #损失值对w2的偏导数
+        self.b1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_b1 #损失值对b1的偏导数
 
         # 更新h2的参数
-        self.w3 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_w3
-        self.w4 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_w4
-        self.b2 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_b2
+        self.w3 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_w3 #损失值对w3的偏导数
+        self.w4 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_w4 #损失值对w4的偏导数
+        self.b2 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_b2 #损失值对b2的偏导数
 
         # 更新o1的参数
         self.w5 -= learn_rate * d_L_d_ypred * d_ypred_d_w5
@@ -135,6 +135,8 @@ class OurNeuralNetwork:
 
 #这里使用的数据集是 4 个样本，根据体重和身高预测性别（1 代表女性，0 代表男性），体重是数值 135 的偏差，身高是数值 66 的偏差。
 # Define dataset
+# 1 英寸(inch) = 2.54 厘米(cm)
+# 1 斤 ≈ 1.102 磅
 data = np.array([
   [-2, -1],  # Alice
   [25, 6],   # Bob
@@ -159,3 +161,4 @@ emily = np.array([-7, -3])  # 测试样本1
 frank = np.array([20, 2])   # 测试样本2
 print("Emily预测值: %.3f" % network.feedforward(emily))  # 应接近1(女性)
 print("Frank预测值: %.3f" % network.feedforward(frank))  # 应接近0(男性)
+
