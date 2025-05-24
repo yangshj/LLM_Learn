@@ -14,6 +14,9 @@ def deriv_sigmoid(x):
   return fx * (1 - fx)
 
 # 损失函数：均方误差
+# y_true - y_pred：计算每个样本的误差（支持广播机制）。
+# ** 2：对误差平方（放大大误差，忽略正负）。
+# .mean()：求所有样本平方误差的平均值（即MSE）mean squared error。
 def mse_loss(y_true, y_pred):
   #   均方误差损失函数
   #     计算预测值与真实值的平均平方差
@@ -47,6 +50,7 @@ class OurNeuralNetwork:
     self.b1 = np.random.normal()
     self.b2 = np.random.normal()
     self.b3 = np.random.normal()
+
 
   def feedforward(self, x):
     '''
