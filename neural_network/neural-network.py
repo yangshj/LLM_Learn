@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-
 # Sigmoid激活函数: f(x) = 1 / (1 + e^(-x))
 # 将任意输入映射到(0,1)区间，常用于二分类问题
 def sigmoid(x):
@@ -26,6 +25,9 @@ def mse_loss(y_true, y_pred):
   #     返回:
   #         平均平方误差
   return ((y_true - y_pred) ** 2).mean()
+
+# 可视化损失值
+losses = []
 
 class OurNeuralNetwork:
   '''
@@ -95,13 +97,13 @@ class OurNeuralNetwork:
         d_L_d_ypred = -2 * (y_true - y_pred)
 
         # 输出层(o1)各参数的梯度
-        d_ypred_d_w5 = h1 * deriv_sigmoid(sum_o1)  # w5的梯度(预测值对w5对偏导数)
-        d_ypred_d_w6 = h2 * deriv_sigmoid(sum_o1)  # w6的梯度(预测值对w6对偏导数)
-        d_ypred_d_b3 = deriv_sigmoid(sum_o1)       # b3的梯度(预测值对b3对偏导数)
+        d_ypred_d_w5 = h1 * deriv_sigmoid(sum_o1)  # w5的梯度(预测值对w5的偏导数)
+        d_ypred_d_w6 = h2 * deriv_sigmoid(sum_o1)  # w6的梯度(预测值对w6的偏导数)
+        d_ypred_d_b3 = deriv_sigmoid(sum_o1)       # b3的梯度(预测值对b3的偏导数)
 
         # 隐藏层对预测值的影响
-        d_ypred_d_h1 = self.w5 * deriv_sigmoid(sum_o1)  # h1对输出的影响
-        d_ypred_d_h2 = self.w6 * deriv_sigmoid(sum_o1)  # h2对输出的影响
+        d_ypred_d_h1 = self.w5 * deriv_sigmoid(sum_o1)  # h1对输出的影响(预测值对h1的偏导数)
+        d_ypred_d_h2 = self.w6 * deriv_sigmoid(sum_o1)  # h2对输出的影响(预测值对h2的偏导数)
 
         # 隐藏层(h1)各参数的梯度
         d_h1_d_w1 = x[0] * deriv_sigmoid(sum_h1)  # w1的梯度(h1对w1偏导数)
@@ -129,13 +131,19 @@ class OurNeuralNetwork:
         self.w6 -= learn_rate * d_L_d_ypred * d_ypred_d_w6
         self.b3 -= learn_rate * d_L_d_ypred * d_ypred_d_b3
 
+
       # 每10轮输出一次损失值
       if epoch % 10 == 0:
         # 计算当前所有样本的预测值
+        # np.apply_along_axis() 是 NumPy 中的一个函数，用于沿着数组的指定轴应用一个函数
+        # 对 data 数组的每一行（因为 axis=1）应用 self.feedforward 函数
+        # 将每一行的数据作为参数传递给 self.feedforward
+        # 将所有结果收集起来并返回
         y_preds = np.apply_along_axis(self.feedforward, 1, data)
         # 计算并输出损失
         loss = mse_loss(all_y_trues, y_preds)
         print("训练轮次 %d 损失值: %.3f" % (epoch, loss))
+        losses.append(loss.item())  # 记录损失值
 
 
 #这里使用的数据集是 4 个样本，根据体重和身高预测性别（1 代表女性，0 代表男性），体重是数值 135 的偏差，身高是数值 66 的偏差。
@@ -167,3 +175,13 @@ frank = np.array([20, 2])   # 测试样本2
 print("Emily预测值: %.3f" % network.feedforward(emily))  # 应接近1(女性)
 print("Frank预测值: %.3f" % network.feedforward(frank))  # 应接近0(男性)
 
+
+# 可视化
+plt.figure(figsize=(10, 5))
+plt.plot(losses, label='Training Loss', color='blue', linewidth=2)
+plt.title('Loss Curve', fontsize=14)
+plt.xlabel('Epoch', fontsize=12)
+plt.ylabel('MSE Loss', fontsize=12)
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.show()  # 关键！必须调用show()显示图像
