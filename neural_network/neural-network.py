@@ -116,7 +116,7 @@ class OurNeuralNetwork:
         d_h2_d_b2 = deriv_sigmoid(sum_h2)  # b2的梯度(h2对b2偏导数)
 
         # --- 更新权重和偏置(梯度下降) ---
-        # 更新h1的参数
+        # 更新h1的参数：如果（d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w1）为正数则减小w1的值，否则增加w1的值。
         self.w1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w1 #损失值对w1的偏导数
         self.w2 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w2 #损失值对w2的偏导数
         self.b1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_b1 #损失值对b1的偏导数
