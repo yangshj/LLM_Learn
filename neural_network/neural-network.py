@@ -1,6 +1,7 @@
 import numpy as np
 
 
+
 # Sigmoid激活函数: f(x) = 1 / (1 + e^(-x))
 # 将任意输入映射到(0,1)区间，常用于二分类问题
 def sigmoid(x):
@@ -32,13 +33,14 @@ class OurNeuralNetwork:
   '''
   def __init__(self):
     # 输入层到隐藏层的权重
-    self.w1 = np.random.normal()
-    self.w2 = np.random.normal()
-    self.w3 = np.random.normal()
-    self.w4 = np.random.normal()
+    self.w1 = np.random.normal()  # 输入1到h1的权重
+    self.w2 = np.random.normal()  # 输入2到h1的权重
+    self.w3 = np.random.normal()  # 输入1到h2的权重
+    self.w4 = np.random.normal()  # 输入2到h2的权重
+
     # 隐藏层到输出层的权重
-    self.w5 = np.random.normal()
-    self.w6 = np.random.normal()
+    self.w5 = np.random.normal()  # h1到o1的权重
+    self.w6 = np.random.normal()  # h2到o1的权重
 
     # Biases
     self.b1 = np.random.normal()
@@ -46,7 +48,14 @@ class OurNeuralNetwork:
     self.b3 = np.random.normal()
 
   def feedforward(self, x):
-    # x is a numpy array with 2 elements.
+    '''
+        前向传播计算
+        参数:
+            x: 包含2个特征的输入数组
+        返回:
+            网络的预测输出(0到1之间的值)
+    '''
+    # 计算隐藏层神经元的加权和与激活值
     h1 = sigmoid(self.w1 * x[0] + self.w2 * x[1] + self.b1)
     h2 = sigmoid(self.w3 * x[0] + self.w4 * x[1] + self.b2)
     o1 = sigmoid(self.w5 * h1 + self.w6 * h2 + self.b3)
@@ -54,16 +63,18 @@ class OurNeuralNetwork:
 
   def train(self, data, all_y_trues):
     '''
-    - data is a (n x 2) numpy array, n = # of samples in the dataset.
-    - all_y_trues is a numpy array with n elements.
-      Elements in all_y_trues correspond to those in data.
+      训练神经网络
+      参数:
+          data: (n×2)的numpy数组，n个样本的特征数据
+          all_y_trues: 包含n个元素的数组，对应样本的真实标签
     '''
-    learn_rate = 0.1
-    epochs = 1000 # number of times to loop through the entire dataset
+    learn_rate = 0.1   # 学习率(梯度下降的步长)
+    epochs = 1000      # 训练轮数(整个数据集的迭代次数)
 
     for epoch in range(epochs):
       for x, y_true in zip(data, all_y_trues):
-        # --- Do a feedforward (we'll need these values later)
+        # --- 前向传播(保留中间结果用于反向传播) ---
+        # 计算隐藏层
         sum_h1 = self.w1 * x[0] + self.w2 * x[1] + self.b1
         h1 = sigmoid(sum_h1)
 
@@ -72,52 +83,57 @@ class OurNeuralNetwork:
 
         sum_o1 = self.w5 * h1 + self.w6 * h2 + self.b3
         o1 = sigmoid(sum_o1)
-        y_pred = o1
+        y_pred = o1 # 预测值数组
 
-        # --- Calculate partial derivatives.
-        # --- Naming: d_L_d_w1 represents "partial L / partial w1"
+        # --- 反向传播: 计算各参数的梯度 ---
+        # 损失函数对预测值的导数
         d_L_d_ypred = -2 * (y_true - y_pred)
 
-        # Neuron o1
-        d_ypred_d_w5 = h1 * deriv_sigmoid(sum_o1)
-        d_ypred_d_w6 = h2 * deriv_sigmoid(sum_o1)
-        d_ypred_d_b3 = deriv_sigmoid(sum_o1)
+        # 输出层(o1)各参数的梯度
+        d_ypred_d_w5 = h1 * deriv_sigmoid(sum_o1)  # w5的梯度
+        d_ypred_d_w6 = h2 * deriv_sigmoid(sum_o1)  # w6的梯度
+        d_ypred_d_b3 = deriv_sigmoid(sum_o1)       # b3的梯度
 
-        d_ypred_d_h1 = self.w5 * deriv_sigmoid(sum_o1)
-        d_ypred_d_h2 = self.w6 * deriv_sigmoid(sum_o1)
+        # 隐藏层对预测值的影响
+        d_ypred_d_h1 = self.w5 * deriv_sigmoid(sum_o1)  # h1对输出的影响
+        d_ypred_d_h2 = self.w6 * deriv_sigmoid(sum_o1)  # h2对输出的影响
 
-        # Neuron h1
-        d_h1_d_w1 = x[0] * deriv_sigmoid(sum_h1)
-        d_h1_d_w2 = x[1] * deriv_sigmoid(sum_h1)
-        d_h1_d_b1 = deriv_sigmoid(sum_h1)
+        # 隐藏层(h1)各参数的梯度
+        d_h1_d_w1 = x[0] * deriv_sigmoid(sum_h1)  # w1的梯度
+        d_h1_d_w2 = x[1] * deriv_sigmoid(sum_h1)  # w2的梯度
+        d_h1_d_b1 = deriv_sigmoid(sum_h1)  # b1的梯度
 
-        # Neuron h2
-        d_h2_d_w3 = x[0] * deriv_sigmoid(sum_h2)
-        d_h2_d_w4 = x[1] * deriv_sigmoid(sum_h2)
-        d_h2_d_b2 = deriv_sigmoid(sum_h2)
+        # 隐藏层(h2)各参数的梯度
+        d_h2_d_w3 = x[0] * deriv_sigmoid(sum_h2)  # w3的梯度
+        d_h2_d_w4 = x[1] * deriv_sigmoid(sum_h2)  # w4的梯度
+        d_h2_d_b2 = deriv_sigmoid(sum_h2)  # b2的梯度
 
-        # --- Update weights and biases
-        # Neuron h1
+        # --- 更新权重和偏置(梯度下降) ---
+        # 更新h1的参数
         self.w1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w1
         self.w2 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_w2
         self.b1 -= learn_rate * d_L_d_ypred * d_ypred_d_h1 * d_h1_d_b1
 
-        # Neuron h2
+        # 更新h2的参数
         self.w3 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_w3
         self.w4 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_w4
         self.b2 -= learn_rate * d_L_d_ypred * d_ypred_d_h2 * d_h2_d_b2
 
-        # Neuron o1
+        # 更新o1的参数
         self.w5 -= learn_rate * d_L_d_ypred * d_ypred_d_w5
         self.w6 -= learn_rate * d_L_d_ypred * d_ypred_d_w6
         self.b3 -= learn_rate * d_L_d_ypred * d_ypred_d_b3
 
-      # --- Calculate total loss at the end of each epoch
+      # 每10轮输出一次损失值
       if epoch % 10 == 0:
+        # 计算当前所有样本的预测值
         y_preds = np.apply_along_axis(self.feedforward, 1, data)
+        # 计算并输出损失
         loss = mse_loss(all_y_trues, y_preds)
-        print("Epoch %d loss: %.3f" % (epoch, loss))
+        print("训练轮次 %d 损失值: %.3f" % (epoch, loss))
 
+
+#这里使用的数据集是 4 个样本，根据体重和身高预测性别（1 代表女性，0 代表男性），体重是数值 135 的偏差，身高是数值 66 的偏差。
 # Define dataset
 data = np.array([
   [-2, -1],  # Alice
@@ -125,6 +141,8 @@ data = np.array([
   [17, 4],   # Charlie
   [-15, -6], # Diana
 ])
+
+# 对应的真实标签(1表示女性，0表示男性)
 all_y_trues = np.array([
   1, # Alice
   0, # Bob
@@ -132,12 +150,12 @@ all_y_trues = np.array([
   1, # Diana
 ])
 
-# Train our neural network!
+# 创建并训练神经网络
 network = OurNeuralNetwork()
 network.train(data, all_y_trues)
 
-# Make some predictions
-emily = np.array([-7, -3]) # 128 pounds, 63 inches
-frank = np.array([20, 2])  # 155 pounds, 68 inches
-print("Emily: %.3f" % network.feedforward(emily)) # 0.951 - F
-print("Frank: %.3f" % network.feedforward(frank)) # 0.039 - M
+# 对新样本进行预测
+emily = np.array([-7, -3])  # 测试样本1
+frank = np.array([20, 2])   # 测试样本2
+print("Emily预测值: %.3f" % network.feedforward(emily))  # 应接近1(女性)
+print("Frank预测值: %.3f" % network.feedforward(frank))  # 应接近0(男性)
